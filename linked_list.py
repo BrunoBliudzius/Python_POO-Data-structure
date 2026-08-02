@@ -25,7 +25,7 @@ class Linked_list:
             current = current.next
         return False
 
-    def append(self, index: int, data):
+    def append(self, data, index=0):
         if index < 0 or index > self.size():
             raise IndexError("Index out of bounds")
 
@@ -47,19 +47,23 @@ class Linked_list:
 
         return node.data
 
-    def remove(self, index: int):
-        if index < 0 or index >= self.size():
-            raise IndexError("Index out of bounds")
+    def remove(self, data):
+        current = self.head
 
-        if index == 0:
-            self.head = self.head.next
-        else:
-            current = self.head
-            for _ in range(index - 1):
-                current = current.next
-            removed_data = current.next.data
-            current.next = current.next.next
-        return removed_data
+        while current:
+            if current.data == data:
+                if current == self.head:
+                    self.head = current.next
+                elif current == self.tail:
+                    self.tail = None
+                else:
+                    prev = self.head
+                    while prev.next != current:
+                        prev = prev.next
+                    prev.next = current.next
+                return current.data
+            current = current.next
+        return None
 
 
 def main():
@@ -81,4 +85,3 @@ def main():
 
 if __name__ == "__main__":
     main()
- 
