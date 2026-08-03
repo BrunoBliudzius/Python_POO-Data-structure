@@ -2,27 +2,33 @@ class Stack:
     def __init__(self):
         self.items = []
 
-    def size(self):
+    def __len__(self):
         return len(self.items)
+
+    def __str__(self):
+        return f"{self.items} <- Top"
+
+    def __bool__(self):
+        return len(self) > 0
 
     def push(self, value):
         self.items.append(value)
-        return f"Value {value} added to the stack"
+        return
 
     def pop(self):
-        if self.size() > 0:
-            value = self.items[-1]
-            self.items.remove(self.items[-1])
-            return f"Value {value} removed from the stack"
-        return None
+        if len(self) == 0:
+            raise IndexError("Stack is empty.")
+
+        return self.items.pop()
 
     def peek(self):
-        if self.size() > 0:
-            return self.items[-1]
-        return None
+        if len(self) == 0:
+            raise IndexError("Stack is empty. Cannot peek from an empty stack.")
+        return self.items[-1]
 
-    def __str__(self):
-        return f"Stack: {self.items}"
+    def clear(self):
+        self.items.clear()
+        return
 
 
 def main():
@@ -34,7 +40,7 @@ def main():
     print(stack.pop())
     print(stack)
     print(f"Peek: {stack.peek()}")
-    print(f"Size: {stack.size()}")
+    print(f"Size: {len(stack)}")
 
 
 if __name__ == "__main__":

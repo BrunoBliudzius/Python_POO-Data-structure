@@ -1,48 +1,112 @@
-from linked_list import Linked_list
+from linked_list import LinkedList
 
 
 class Hash_table:
     def __init__(self, size):
         self.size = size
         self.table = [None] * size
-
-    def hash_define(self, key):
-        return hash(key) % self.size
-
-    def put(self, key, value):
-        index = self.hash_define(key)
-        if self.table[index] is None:
-            self.table[index] = Linked_list()
-        self.table[index].append({key: value})
-
-    def get(self, key):
-        index = self.hash_define(key)
-        if self.table[index] is None:
-            return None
-
-        current = self.table[index].head
-        while current:
-            if key in current.data:
-                return current.data[key]
-            current = current.next
-        return None
-
-    def remove(self, key):
-        index = self.hash_define(key)
-        if self.table[index] is None:
-            return None
-
-        self.table[index].remove({key: self.get(key)})
+        self.count = 0
 
     def __str__(self):
         result = []
-        for i, linked_list in enumerate(self.table):
-            if linked_list is not None:
-                current = linked_list.head
-                while current:
-                    result.append(f"Index {i}: {current.data}")
-                    current = current.next
-        return "\n".join(result)
+        for i, linkedList in enumerate(self.table):
+            try:
+                for key, value in linkedList:
+                    result.append(f"Index {i}: \n('{key}', '{value}')\n")
+            except TypeError:
+                result.append(f"Index {i}: \n\n")
+        return "".join(result)
+
+    def __len__(self):
+        return self.count
+
+    def __contains__(self, key):
+        index = self._hash(key)
+        if self.table[index] is None:
+            return False
+
+        for current in self.table[index]:
+            k, v = current
+            if k == key:
+                return True
+        return False
+
+    def resize(self):
+        load_factor = self.count / self.size
+
+        if load_factor > 0.75:
+            new_table = Hash_table(self.size * 2)
+
+            for index in range(self.size):
+                if self.table[index] is not None:
+                    for current in self.table[index]:
+                        k, v = current
+                        new_table.put(k, v)
+
+            self.size = new_table.size
+            self.table = new_table.table
+        return
+
+    def _hash(self, key):
+        return hash(key) % self.size
+
+    def get(self, key):
+        index = self._hash(key)
+        if self.table[index] is None:
+            return None
+
+        for current in self.table[index]:
+            k, v = current
+            if k == key:
+                return v
+        return None
+
+    def keys(self):
+        keys_list = []
+        for index in range(self.size):
+            if self.table[index] is not None:
+                for current in self.table[index]:
+                    k, v = current
+                    keys_list.append(k)
+        return keys_list
+
+    def values(self):
+        values_list = []
+        for index in range(self.size):
+            if self.table[index] is not None:
+                for current in self.table[index]:
+                    k, v = current
+                    values_list.append(v)
+        return values_list
+
+    def put(self, key, value):
+        index = self._hash(key)
+
+        if self.table[index] is None:
+            self.table[index] = LinkedList()
+
+        if key in self.table[index]:
+            for current in self.table[index]:
+                k, v = current
+                if k == key and v != value:
+                    current.data = (key, value)
+        else:
+            self.table[index].append((key, value))
+            self.count += 1
+
+        self.resize()
+        return
+
+    def remove(self, key):
+        index = self._hash(key)
+        if self.table[index] is None:
+            return None
+        try:
+            self.table[index].remove((key, self.get(key)))
+            self.count -= 1
+            return
+        except ValueError:
+            return None
 
 
 def main():
@@ -51,14 +115,7 @@ def main():
     hash_table.put("age", 30)
     hash_table.put("city", "New York")
 
-    print(hash_table.get("name"))  # Output: John
-    print(hash_table.get("age"))  # Output: 30
-    print(hash_table.get("city"))  # Output: New York
-
-    print(hash_table)
-
     hash_table.remove("age")
-    print(hash_table.get("age"))
 
     print(hash_table)  # Output: None
 

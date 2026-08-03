@@ -1,37 +1,43 @@
-class queue:
+class Queue:
     def __init__(self):
         self.items = []
 
-    def queue_size(self):
+    def __len__(self):
         return len(self.items)
+
+    def __bool__(self):
+        return len(self) > 0
+
+    def __contains__(self, value):
+        return value in self.items
+
+    def __str__(self):
+        return str(self.items)
 
     def enqueue(self, value):
         self.items.append(value)
-        return f"Value: {value} added to the queue."
 
     def dequeue(self):
-        if self.queue_size() == 0:
-            return "Queue is empty."
-        value = self.items[0]
-        self.items.pop(0)
-        return f"Value: {value} removed from the queue"
+        if len(self) == 0:
+            raise IndexError("Queue is empty")
+        return self.items.pop(0)
 
     def peek(self):
-        if self.queue_size() == 0:
-            return "Queue is empty."
-        return f"Value: {self.items[0]} is at the front of the queue."
+        if len(self) == 0:
+            raise IndexError("Queue is empty")
+        return self.items[0]
 
     def back(self):
-        if self.queue_size() == 0:
-            return "Queue is empty."
-        return f"Value: {self.items[-1]} is at the back of the queue."
+        if len(self) == 0:
+            raise IndexError("Queue is empty.")
+        return self.items[-1]
 
-    def __str__(self):
-        return f"Queue: {self.items}"
+    def clear(self):
+        self.items.clear()
 
 
 def main():
-    q = queue()
+    q = Queue()
     print(q.enqueue(1))
     print(q.enqueue(2))
     print(q.enqueue(3))
