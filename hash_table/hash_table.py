@@ -1,8 +1,8 @@
-from linked_list import LinkedList
+from hash_tableLinked_list import hash_tableLinked_list
 
 
 class Hash_table:
-    def __init__(self, size):
+    def __init__(self, size=10):
         self.size = size
         self.table = [None] * size
         self.count = 0
@@ -34,7 +34,7 @@ class Hash_table:
     def resize(self):
         load_factor = self.count / self.size
 
-        if load_factor > 0.75:
+        if load_factor > 0.7:
             new_table = Hash_table(self.size * 2)
 
             for index in range(self.size):
@@ -117,7 +117,7 @@ def main():
 
     hash_table.remove("age")
 
-    print(hash_table)  # Output: None
+    print(hash_table)
 
 
 if __name__ == "__main__":
