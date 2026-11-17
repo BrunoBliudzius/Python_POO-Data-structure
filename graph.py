@@ -1,96 +1,142 @@
 from queue import Queue
-from set import Set
 
 
 class Graph:
-    def __init__(self, is_directed=False):
-        self.is_directed = is_directed
-        self.vertex = []
-        self.adj_list = {}
+    def __init__(self):
+        self.vertexes = {}
+        self.vertex_count = 0
 
-    def __str__(self):
-        res = ""
-        for vertex in self.vertex:
-            res += f"{vertex} -> "
-            for neighbor in self.adj_list[vertex]:
-                res += f"{neighbor} "
-            res += "\n"
-        return res
+    def add_vertex(self, vertex):
+        if vertex not in self.vertexes.keys():
+            self.vertexes[vertex] = []
+            self.vertex_count += 1
 
-    def add_vertex(self, v):
-        if not v in self.vertex:
-            self.vertex.append(v)
-            self.adj_list[v] = []
+    def remove_vertex(self, vertex):
+        if vertex in self.vertexes.keys():
+            del self.vertexes[vertex]
+            self.vertex_count -= 1
 
-    def add_edge(self, a, b):
-        self.add_vertex(a)
-        self.add_vertex(b)
+            for v in self.vertexes.keys():
+                if vertex in self.vertexes[v]:
+                    self.vertexes[v].remove(vertex)
 
-        self.adj_list[a].append(b)
+    def add_neighbor(self, vertex, neighbor):
+        if (
+            vertex in self.vertexes.keys()
+            and neighbor in self.vertexes.keys()
+            and neighbor not in self.vertexes[vertex]
+        ):
+            self.vertexes[vertex].append(neighbor)
 
-        if not self.is_directed:
-            self.adj_list[b].append(a)
+    def remove_neighbor(self, vertex, neighbor):
+        if vertex in self.vertexes.keys() and neighbor in self.vertexes.keys():
+            if neighbor in self.vertexes[vertex]:
+                self.vertexes[vertex].remove(neighbor)
 
-    def bfs(self, element=None):
-        queue = Queue()
-        visited = Set()
-        order = []
+    def depth_search(self, start_vertex, end_vertex):
+        if (
+            start_vertex not in self.vertexes.keys()
+            or end_vertex not in self.vertexes.keys()
+        ):
+            return f"Vertex {start_vertex} or {end_vertex} not found in the graph."
 
-        if element is None:
-            start = self.vertex[0]
-        else:
-            if element in self.vertex:
-                start = element
-            else:
-                raise ValueError("Element not found")
+        self.verified = []
+        stack = [start_vertex]
 
-        queue.enqueue(start)
-        visited.add(start)
+        while stack:
+            current_vertex = stack.pop()
+            if current_vertex not in self.verified:
+                if current_vertex == end_vertex:
+                    return f"Vertex {end_vertex} found in the graph"
 
-        while len(queue) > 0:
-            current = queue.dequeue()
-            order.append(current)
+                self.verified.append(current_vertex)
 
-            for neighbor in self.adj_list[current]:
-                if neighbor not in visited:
-                    visited.add(neighbor)
-                    queue.enqueue(neighbor)
+                for neighbor in self.vertexes[current_vertex]:
+                    if neighbor not in self.verified:
+                        stack.append(neighbor)
 
-        return order
+    def width_search(self, start_vertex, end_vertex):
+        if (
+            start_vertex not in self.vertexes.keys()
+            or end_vertex not in self.vertexes.keys()
+        ):
+            return f"Vertex {start_vertex} or {end_vertex} not found in the graph."
+
+        self.verified = []
+        queue = [start_vertex]
+
+        while queue:
+            current_vertex = queue.pop(0)
+            if current_vertex not in self.verified:
+                if current_vertex == end_vertex:
+                    return f"Vertex {end_vertex} found in the graph"
+
+                self.verified.append(current_vertex)
+
+                for neighbor in self.vertexes[current_vertex]:
+                    if neighbor not in self.verified:
+                        queue.append(neighbor)
+
+        return f"Vertex {end_vertex} not found in the graph."
+
+
+MENU = """
+===== GRAPH MENU =====
+1 - Add vertex
+2 - Remove vertex
+3 - Add neighbor
+4 - Remove neighbor
+5 - Depth-first search (DFS)
+6 - Breadth-first search (BFS)
+7 - Show graph
+0 - Exit
+======================
+"""
 
 
 def main():
-    print("=== Undirected Graph ===")
-
     graph = Graph()
 
-    graph.add_edge("A", "B")
-    graph.add_edge("A", "C")
-    graph.add_edge("B", "D")
-    graph.add_edge("C", "D")
-    graph.add_edge("D", "F")
-    graph.add_edge("E", "F")
-    print(graph)
+    while True:
+        print(MENU)
+        option = input("Choose an option: ").strip()
 
-    print("=" * 30)
-    print()
-    print("=== Directed Graph ===")
+        if option == "0":
+            print("Goodbye!")
+            break
+        elif option == "1":
+            graph.add_vertex(input("Vertex name: ").strip())
 
-    directed_graph = Graph(is_directed=True)
+        elif option == "2":
+            graph.remove_vertex(input("Vertex to remove: ").strip())
 
-    directed_graph.add_edge("A", "B")
-    directed_graph.add_edge("A", "C")
-    directed_graph.add_edge("C", "B")
-    directed_graph.add_edge("B", "D")
-    directed_graph.add_edge("D", "A")
-    print(directed_graph)
+        elif option == "3":
+            vertex = input("From vertex: ").strip()
+            neighbor = input("To vertex: ").strip()
+            graph.add_neighbor(vertex, neighbor)
 
-    print("=" * 30)
-    print()
-    print("=== Visited Vertex ===")
+        elif option == "4":
+            vertex = input("From vertex: ").strip()
+            neighbor = input("To vertex: ").strip()
+            graph.remove_neighbor(vertex, neighbor)
 
-    visited = graph.bfs("F")
-    print(visited)
+        elif option == "5":
+            start = input("Start vertex: ").strip()
+            end = input("Target vertex: ").strip()
+            print(graph.depth_search(start, end))
+
+        elif option == "6":
+            start = input("Start vertex: ").strip()
+            end = input("Target vertex: ").strip()
+            print(graph.width_search(start, end))
+
+        elif option == "7":
+            print(f"\nVertices: {graph.vertex_count}")
+
+            for vertex, neighbors in graph.vertexes.items():
+                print(f"{vertex} -> {neighbors}")
+            else:
+                print("Invalid option. Please try again.")
 
 
 if __name__ == "__main__":
